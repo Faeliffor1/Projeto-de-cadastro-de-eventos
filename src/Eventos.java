@@ -2,12 +2,18 @@ import java.time.LocalDateTime;
 
 public class Eventos {
 
-    private  String nome_evento;
+    private   String nome_evento;
     private  String endereco;
     private  String categoria;
     private  LocalDateTime datahora;
     private String descricao;
     private  boolean confirmado;
+
+    public String getNome_evento() {return nome_evento;}
+    public String getEndereco() {return endereco;}
+    public String getCategoria() {return categoria;}
+    public String getDescricao() {return descricao;}
+    public LocalDateTime getdatahora() {return datahora;}
 
 
     public Eventos (String nome_evento , String endereco, String categoria,String descricao, LocalDateTime datahora){
@@ -44,10 +50,10 @@ public class Eventos {
     public String toString(){
         String status = confirmado ? "[CONFIRMADO]" : "[PENDENTE]";
         String ocorreu = jaOcorreu() ? "[JÁ ACONTECEU]" : "[FUTURO]";
-        return status + " " + nome_evento +
+        return status + "| Nome: " + nome_evento +
                 " | Local: " + endereco +
                 " | Categoria: " + categoria +
-                " | " + descricao +
+                " | Descrição:  " + descricao +
                 " | Data/Hora: " + datahora +
                 ocorreu;
     }

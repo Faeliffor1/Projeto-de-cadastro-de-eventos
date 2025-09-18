@@ -21,6 +21,9 @@ public class App {
         Usuario usuario = new Usuario(nome, email, senha);
         System.out.println("Usuario Cadastrado: " + usuario);
 
+        // Salvando eventos no arquivo
+        usuario.carregarEventos();
+
         // Looping para saber o que o usuario vai querer
 
         while(true){
@@ -114,6 +117,7 @@ public class App {
             }
 
             else if (opcao == 6){
+                usuario.salvarEventos();
                 System.out.println("Saindo... Até mais tarde...");
                 break;
             }
