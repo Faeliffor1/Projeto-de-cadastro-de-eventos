@@ -5,7 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.io.*;
 import java.nio.file.*;
 import java.io.IOException;
-import java.util.*;
+import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 
 public class Usuario {
 
@@ -14,11 +15,61 @@ public class Usuario {
     private String email;
     private String senha;
 
+    public String getNome() {
+        return nome;
+    }
+    public String getEmail() {
+        return email;
+    }
+    public String getSenha() {
+        return senha;
+    }
+
+    public String eventosFilenameforemail(String email){
+
+        return "eventos_" + Base64.getEncoder().withoutPadding()
+                .encodeToString(email.getBytes(StandardCharsets.UTF_8)) + ".data";
+    }
+
+    public static List<Usuario> carregarUsuarios(){
+        List<Usuario> usuarios = new ArrayList<>();
+        Path p = Paths.get("Usuarios.data");
+
+        if(!Files.exists(p)){
+            return usuarios;
+        }
+
+        try (BufferedReader reader = Files.newBufferedReader(p,StandardCharsets.UTF_8)){
+            String linha;
+            while ((linha = reader.readLine())!=null){
+                String[] linhaSplit = linha.split(";");
+                if(linhaSplit.length==3){
+                    String nome = linhaSplit[0];
+                    String email = linhaSplit[1];
+                    String senha = linhaSplit[2];
+                    Usuario u = new Usuario(nome,email,senha);
+
+                    String evFile = u.eventosFilenameforemail(email);
+                    u.carregarEventos(evFile);
+                    usuarios.add(u);
+                }
+            }
+        }catch (IOException ex){
+            System.out.println("Erro ao carregar usuário " + ex.getMessage());
+
+        }return usuarios;
+    }
+
+
+
+
+
+
 
     private static final DateTimeFormatter formatar = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    public void salvarEventos(){
-        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("eventos.data"))){
+    public void salvarEventos(String evFile){
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(evFile))){
             for (Eventos e : eventos) {
                 String linha = String.join(";",
                         e.getNome_evento(),
@@ -41,11 +92,11 @@ public class Usuario {
 
     }
 
-    public void carregarEventos(){
-        Path caminho = Paths.get("eventos.data");
+    public void carregarEventos(String evFile){
+        Path caminho = Paths.get(evFile);
         if (!Files.exists(caminho)) return;
 
-        try (BufferedReader reader = Files.newBufferedReader(caminho)){
+        try (BufferedReader reader = Files.newBufferedReader(caminho, StandardCharsets.UTF_8)){
             String linha;
             while ((linha = reader.readLine()) != null){
                 String[] partes = linha.split(";");

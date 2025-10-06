@@ -1,28 +1,84 @@
 import org.jetbrains.annotations.NotNull;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.nio.charset.StandardCharsets;
 
 
 public class App {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        Scanner input = new Scanner(System.in);
 
-        // Input do cadastro dos usuarios
+        List<Usuario> usuarios = Usuario.carregarUsuarios();
 
-        System.out.println("=== CADASTRO DE USUÁRIO ===");
-        System.out.println("Digite seu nome: ");
-        String nome = input.nextLine();
-        System.out.println("Digite seu email: ");
-        String email = input.nextLine();
-        System.out.println("Digite seu senha: ");
-        String senha = input.nextLine();
+        System.out.println("== MENU INICIAL ==");
+        System.out.println("1 - Cadastrar Usuario: ");
+        System.out.println("2 - Login Usuario: ");
+        int escolha = sc.nextInt();
+        sc.nextLine();
 
-        Usuario usuario = new Usuario(nome, email, senha);
-        System.out.println("Usuario Cadastrado: " + usuario);
+        Usuario usuario = null;
 
-        // Salvando eventos no arquivo
-        usuario.carregarEventos();
+        switch (escolha) {
+            case 1:
+                System.out.println("Digite o nome do usuario: ");
+                String nome = sc.nextLine();
+                System.out.println("Didite o email do usuario: ");
+                String email = sc.nextLine();
+                System.out.println("Digite o senha do usuario: ");
+                String senha = sc.nextLine();
+                Usuario novoUsuario = new Usuario(nome, email, senha);
+                usuarios.add(novoUsuario);
+
+
+                // SALVAR O USUARIO NO ARQUIVO Usuarios.data
+                try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("Usuarios.data"),
+                        StandardCharsets.UTF_8 , StandardOpenOption.CREATE , StandardOpenOption.APPEND)){
+                    writer.write(nome + ";" + email + ";" + senha);
+                    writer.newLine();
+
+                }catch (IOException e){
+                System.out.println("Erro ao criar o usuario " + e.getMessage());
+                }
+                System.out.println("Usuario cadastrado com sucesso!");
+                usuario = novoUsuario;
+                break;
+
+            case 2:
+                System.out.println("Email: ");
+                String emailLogin = sc.nextLine();
+                System.out.println("Senha: ");
+                String senhaLogin = sc.nextLine();
+
+                for(Usuario u : usuarios) {
+                    if (u.getSenha().equals(senhaLogin) && u.getEmail().equals(emailLogin)) {
+                        usuario = u;
+                        break;
+                    }
+                }
+
+                if (usuario == null) {
+                    System.out.println("Nenhum usuario encontrado ou senha incorreta!");
+                    return;
+                }
+                break;
+
+            default:
+                    System.out.println("Opção inválida");
+                    return;
+
+        }
+        // Carregando eventos no arquivo
+        String evFile = usuario.eventosFilenameforemail(usuario.getEmail());
+        usuario.carregarEventos(evFile);
+
 
         // Looping para saber o que o usuario vai querer
 
@@ -35,7 +91,7 @@ public class App {
             System.out.println("5 - Excluir evento ccadastrado");
             System.out.println("6 - Sair");
             System.out.print("Escolha: ");
-            int opcao = input.nextInt();
+            int opcao = Integer.parseInt(sc.nextLine());
 
 
             // Condiçoes para cada escolha
@@ -54,16 +110,16 @@ public class App {
 
                 // Cadastrando evento
                 System.out.print("Ano: ");
-                int ano = sc.nextInt();
+                int ano = Integer.parseInt(sc.nextLine());
                 System.out.print("Mes: ");
-                int mes = sc.nextInt();
+                int mes = Integer.parseInt(sc.nextLine());
                 System.out.print("Dia: ");
-                int dia = sc.nextInt();
+                int dia = Integer.parseInt(sc.nextLine());
                 System.out.print("Hora: ");
-                int hora = sc.nextInt();
+                int hora = Integer.parseInt(sc.nextLine());
                 System.out.print("Minuto: ");
-                int minuto = sc.nextInt();
-                sc.nextLine();
+                int minuto = Integer.parseInt(sc.nextLine());
+
 
                 LocalDateTime datahora = LocalDateTime.of(ano,mes,dia,hora,minuto);
                 Eventos eventos = new Eventos(nome_evento, endereco, categoria, descricao, datahora );
@@ -117,7 +173,7 @@ public class App {
             }
 
             else if (opcao == 6){
-                usuario.salvarEventos();
+                usuario.salvarEventos(evFile);
                 System.out.println("Saindo... Até mais tarde...");
                 break;
             }
